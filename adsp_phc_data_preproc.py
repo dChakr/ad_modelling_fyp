@@ -1,10 +1,9 @@
-import pandas as pd
-
 '''
 PRE-PROCESSING ADSP-PHC DATA
 
 Filter the cognitive data from the ADSP Phenotype Harmonization Consortium to match subjects with those for whome we have function connectivity fMRI data. 
 '''
+import pandas as pd
 
 def check_correct_patients(filtered_rows, subject_rids):
     ''' Check no required subject has been left out after filtering the ADSP-PHC data '''
