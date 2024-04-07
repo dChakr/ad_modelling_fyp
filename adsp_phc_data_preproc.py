@@ -29,9 +29,7 @@ def filter_adsp_data(ADSP_DIR, DATA_PATH, subject_rids):
     idxs_to_drop = []
     for idx, rid in enumerate(df['RID'].values):
         if rid not in subject_rids:
-            # print(rid)
             idxs_to_drop.append(idx)
-    # print(idxs_to_drop)
             
     filtered_rows = df.drop(idxs_to_drop)
 
@@ -39,7 +37,8 @@ def filter_adsp_data(ADSP_DIR, DATA_PATH, subject_rids):
         print('ERROR: incorrect filtering of ADSP-PHC data')
     return filtered_rows
 
-def save_filtered_fc(output_file, subject_rids, filtered_rows):
+def save_filtered_fc(output_file_subj, output_file_data, subject_rids, filtered_rows):
+    
     # Save subject_list as those that we have cognitive scores for
     for rid in subject_rids:
         if rid not in filtered_rows['RID'].values:
@@ -47,17 +46,20 @@ def save_filtered_fc(output_file, subject_rids, filtered_rows):
 
     fc_subj = {'rid' : subject_rids}
     fc_subj_file = pd.DataFrame(fc_subj)
-    fc_subj_file.to_csv(output_file)
+    fc_subj_file.to_csv(output_file_subj)
+    filtered_rows.to_csv(output_file_data)
+
 
 if __name__ == '__main__':
 
     ADSP_DIR = "../../data/ADSP_ADNI_Cognition_Dec2023"
     DATA_PATH = "ADSP_PHC_COGN_Dec2023.csv"
     SUBJECT_LIST = "../subjects.txt"  # subject RIDs from the FC data
-    FILTERED_SUBJ_LIST = "../filtered_fc_subjects.txt"
+    FILTERED_SUBJ_LIST = "filtered_fc_subjects.txt"
+    FILTERED_ADSP_DATA = "ADSP_PHC_COGN_Dec2023_FILTERED.csv"
     
     subject_rids = find_rid_from_fc(SUBJECT_LIST)
     filtered_rows = filter_adsp_data(ADSP_DIR, DATA_PATH, subject_rids)
 
-    save_filtered_fc(FILTERED_SUBJ_LIST, subject_rids, filtered_rows)
+    save_filtered_fc(FILTERED_SUBJ_LIST, FILTERED_ADSP_DATA, subject_rids, filtered_rows)
 
