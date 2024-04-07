@@ -1,17 +1,21 @@
 #!/bin/bash
-batch_size=100
-total_fmri_files=2017
 
-num_batches=$(( (total_fmri_files + batch_size - 1) / batch_size ))
+#PBS -l walltime=10:00:00
+#PBS -l select=1:ncpus=1:mem=50gb:cpu_type=rome
+#PBS -o /rds/general/user/dc420/home/ad_modelling_fyp/logs/
+#PBS -e /rds/general/user/dc420/home/ad_modelling_fyp/logs/
 
-for ((batch = 2; batch <= num_batches; batch++))
-do  
-    start=$(( batch * (batch_size) ))
-    # find . -type f | sort | head -n 200 | tail -n 100
-    if [ $start -ge $total_fmri_files ]; then
-        files_left=$(( total_fmri_files - (start - batch_size) ))
-        echo "Last batch: tail -n $files_left"
-    else
-        echo "Current batch: head -n $start | tail -n $batch_size"
-    fi
-done
+module load tools/prod
+module load SciPy-bundle/2022.05-foss-2022a
+pip install scikit-learn
+pip install nibabel
+pip install nilearn
+
+cp $HOME/ad_modelling_fyp/data/Schaefer2018_116Parcels_7Networks_order_FSLMNI152_2mm.nii.gz $TMPDIR
+cp $HOME/ad_modelling_fyp/generate_fc_matrix.py $TMPDIR
+cp -r $HOME/FMRI_ADNI_DATA/$ARGUMENT/ $TMPDIR/fmri
+mkdir $TMPDIR/fc
+
+python generate_fc_matrix.py $TMPDIR/fmri $TMPDIR/fc $TMPDIR/Schaefer2018_116Parcels_7Networks_order_FSLMNI152_2mm.nii.gz
+
+cp -r $TMPDIR/fc $HOME/FMRI_ADNI_DATA/fc
