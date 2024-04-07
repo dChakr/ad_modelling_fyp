@@ -29,12 +29,15 @@ if __name__ == '__main__':
     )
 
     fmri_filenames = [file for file in os.listdir(SOURCE_DIR) if file.endswith('.nii.gz')]
-
-    for file in fmri_filenames:
-        
+    i = 1
+    total_files = len(fmri_filenames)
+    
+    for file in fmri_filenames:    
         fmri_data = os.path.join(SOURCE_DIR, file)
         time_series = masker.fit_transform(fmri_data)
         correlation_matrix = correlation_measure.fit_transform([time_series])[0]
         
         np.savetxt(f'{OUTPUT_DIR}/{file}_FC.csv', correlation_matrix, delimiter=",")
+        print(f'COMPLETED: {i}/{total_files}')
+        i+=1
 
