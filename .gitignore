@@ -1,1 +1,6 @@
 nilearn_cache/
+nilearn/
+logs/
+*.log
+*.sh.e*
+*.sh.o*
