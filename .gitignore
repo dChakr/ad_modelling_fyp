@@ -1,6 +1,7 @@
 nilearn_cache/
 nilearn/
 logs/
+.ipynb_checkpoints/
 *.log
 *.sh.e*
 *.sh.o*
