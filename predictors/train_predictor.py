@@ -102,7 +102,7 @@ def evaluate(x_test, y_test, model):
     return r2
 
 if __name__ == '__main__':
-    ADSP_DATA_PATH = "data/ADSP_PHC_COGN_Dec2023_FILTERED_wfiles.csv"
+    ADSP_DATA_PATH = "../data/ADSP_PHC_COGN_Dec2023_FILTERED_wfiles.csv"
     PREDICTOR_TYPE = 'VSP'
     FC_DATA_PATH = '../FMRI_ADNI_DATA/fc'
     # ADSP_DATA_PATH = sys.argv[1]
