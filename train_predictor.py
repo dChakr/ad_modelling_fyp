@@ -102,11 +102,12 @@ def evaluate(x_test, y_test, model):
     return r2
 
 if __name__ == '__main__':
-    # ADSP_DATA_PATH = "data/ADSP_PHC_COGN_Dec2023_FILTERED_wfiles.csv"
-    # PREDICTOR_TYPE = 'EXF'
-    ADSP_DATA_PATH = sys.argv[1]
-    PREDICTOR_TYPE = sys.argv[2]
-    FC_DATA_PATH = sys.argv[3]
+    ADSP_DATA_PATH = "data/ADSP_PHC_COGN_Dec2023_FILTERED_wfiles.csv"
+    PREDICTOR_TYPE = 'VSP'
+    FC_DATA_PATH = '../FMRI_ADNI_DATA/fc'
+    # ADSP_DATA_PATH = sys.argv[1]
+    # PREDICTOR_TYPE = sys.argv[2]
+    # FC_DATA_PATH = sys.argv[3]
 
     df = pd.read_csv(ADSP_DATA_PATH)
     print("Getting features and target...")
@@ -123,15 +124,15 @@ if __name__ == '__main__':
     x_train, x_test, y_train, y_test = clean_data(x_train, x_test, y_train, y_test)
     print("Done")
 
-    # Start Randomised Search
-    print("Starting randomised search...")
-    best_params = randomised_grid_search(x_train, y_train)
+    # # Start Randomised Search
+    # print("Starting randomised search...")
+    # best_params = randomised_grid_search(x_train, y_train)
 
-    PARAM_FILE = f'{PREDICTOR_TYPE}_best_params.json'
+    # PARAM_FILE = f'{PREDICTOR_TYPE}_best_params.json'
 
-    # Write data to a JSON file
-    with open(PARAM_FILE, 'w') as json_file:
-        json.dump(best_params, json_file)
+    # # Write data to a JSON file
+    # with open(PARAM_FILE, 'w') as json_file:
+    #     json.dump(best_params, json_file)
 
     # best_rf = RandomForestRegressor(n_estimators=best_params['n_estimators'],
     #                                 max_features=best_params['max_features'],

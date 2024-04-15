@@ -5,3 +5,4 @@ logs/
 *.log
 *.sh.e*
 *.sh.o*
+models/
