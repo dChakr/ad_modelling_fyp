@@ -6,3 +6,4 @@ logs/
 *.sh.e*
 *.sh.o*
 whobpyt/
+models/
