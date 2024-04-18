@@ -1244,7 +1244,6 @@
 3885,6790,M030,2.0,0.656,-0.392,-0.011,0.483,../FMRI_ADNI_DATA/fc/sub-ADNI016S6790_ses-M030_task-rest_space-MNI152Lin_res-2_desc-preproc_bold_ExtSchaefer116_ROI_activity.mat
 3891,6798,M000,2.0,0.371,-0.083,0.71,0.264,../FMRI_ADNI_DATA/fc/sub-ADNI029S6798_ses-M000_task-rest_space-MNI152Lin_res-2_desc-preproc_bold_ExtSchaefer116_ROI_activity.mat
 3892,6798,M024,2.0,0.313,-0.176,1.035,0.264,../FMRI_ADNI_DATA/fc/sub-ADNI029S6798_ses-M024_task-rest_space-MNI152Lin_res-2_desc-preproc_bold_ExtSchaefer116_ROI_activity.mat
-3894,6800,M018,3.0,-1.466,-0.903,-0.381,0.264,../FMRI_ADNI_DATA/fc/sub-ADNI016S6800_ses-M018_task-rest_space-MNI152Lin_res-2_desc-preproc_bold_ExtSchaefer116_ROI_activity.mat
 3895,6801,M000,1.0,0.329,0.203,-0.057,0.264,../FMRI_ADNI_DATA/fc/sub-ADNI041S6801_ses-M000_task-rest_space-MNI152Lin_res-2_desc-preproc_bold_ExtSchaefer116_ROI_activity.mat
 3896,6801,M012,1.0,0.033,0.227,0.128,-0.333,../FMRI_ADNI_DATA/fc/sub-ADNI041S6801_ses-M012_task-rest_space-MNI152Lin_res-2_desc-preproc_bold_ExtSchaefer116_ROI_activity.mat
 3898,6804,M000,2.0,0.207,0.341,0.085,0.963,../FMRI_ADNI_DATA/fc/sub-ADNI032S6804_ses-M000_task-rest_space-MNI152Lin_res-2_desc-preproc_bold_ExtSchaefer116_ROI_activity.mat
