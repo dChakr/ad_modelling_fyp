@@ -5,5 +5,7 @@ logs/
 *.log
 *.sh.e*
 *.sh.o*
-whobpyt/
 models/
+whobpyt_dir/
+whobpyt/
+requirements.txt
