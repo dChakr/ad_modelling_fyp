@@ -18,6 +18,7 @@ def find_rid_from_fc(SUBJECT_LIST):
     # Find the RIDs for subjects that have functional connectivity data
     with open(SUBJECT_LIST, 'r') as file:
         subject_rids = [int(name[-4:]) for name in [line.strip() for line in file.readlines()]]
+        # subject_rids = [int(line.strip()) for line in file.readlines()]
 
     # print(sorted(subject_rids))
     return subject_rids
@@ -52,11 +53,11 @@ def save_filtered_fc(output_file_subj, output_file_data, subject_rids, filtered_
 
 if __name__ == '__main__':
 
-    ADSP_DIR = "../../data/ADSP_ADNI_Cognition_Dec2023"
-    DATA_PATH = "ADSP_PHC_COGN_Dec2023.csv"
+    ADSP_DIR = "data"
+    DATA_PATH = "ADAS_ADNIGO23_17Apr2024.csv"
     SUBJECT_LIST = "../subjects.txt"  # subject RIDs from the FC data
     FILTERED_SUBJ_LIST = "filtered_fc_subjects.txt"
-    FILTERED_ADSP_DATA = "ADSP_PHC_COGN_Dec2023_FILTERED.csv"
+    FILTERED_ADSP_DATA = "ADAS_SCORES_FILTERED.csv"
     
     subject_rids = find_rid_from_fc(SUBJECT_LIST)
     filtered_rows = filter_adsp_data(ADSP_DIR, DATA_PATH, subject_rids)
