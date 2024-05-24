@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#PBS -l walltime=10:00:00
-#PBS -l select=1:ncpus=10:mem=500gb
+#PBS -l walltime=56:00:00
+#PBS -l select=1:ncpus=10:mem=50gb
 #PBS -o /rds/general/user/dc420/home/ad_modelling_fyp/logs/optuna_studies/
 #PBS -e /rds/general/user/dc420/home/ad_modelling_fyp/logs/optuna_studies/
 
@@ -20,6 +20,6 @@ cp $HOME/ad_modelling_fyp/data/DTI_fiber_consensus_HCP.csv $TMPDIR
 cp $HOME/ad_modelling_fyp/train_rww.py $TMPDIR
 cp -r $HOME/FMRI_ADNI_DATA/fc $TMPDIR
 
-python train_rww.py $ARGUMENT 'CN_ADNIMERGE_29Apr2024_wFiles.csv' 'DTI_fiber_consensus_HCP.csv' 1 1
+python train_rww.py $ARGUMENT 'CN_ADNIMERGE_29Apr2024_wFiles.csv' 'DTI_fiber_consensus_HCP.csv' 150 10
 
-cp optuna_$ARGUMENT $HOME/ad_modelling_fyp/data/
+cp optuna_$ARGUMENT.json $HOME/ad_modelling_fyp/data/

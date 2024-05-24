@@ -1,0 +1,1 @@
+{"params": {"learning_rate": 0.05, "num_epochs": 20, "step_size": 0.01, "G": 100}, "score": 0.03597494167305225}

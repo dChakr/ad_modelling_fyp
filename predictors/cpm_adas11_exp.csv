@@ -1,0 +1,2 @@
+,no_files,noise,p_threshold,fc_gen_method,sample_method,pearson_r_pos,pearson_r_neg,spearman_rho_pos,spearman_rho_neg,r2_pos,r2_neg,mse_pos,mse_neg
+0,66,0.0001,0.05,compute_correlation,stratified,0.19429768976696976,-0.07140965598750981,0.12645353033336565,-0.09444315219874633,-5.617831230610038,-10.537068237202183,47.85370729259691,54.80550807383122

@@ -1,0 +1,1 @@
+{"params": {"subsample": 0.7100000000000001, "n_estimators": 100, "min_samples_split": 10, "max_features": "sqrt", "max_depth": 10, "learning_rate": 0.1}, "r2_score_train": -0.05090617930150556, "r2_score_test": -0.04903741037397813}
