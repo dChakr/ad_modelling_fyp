@@ -4,6 +4,5 @@ logs/
 *.log
 *.sh.e*
 *.sh.o*
-models/
 whobpyt_dir/
 nilearn/

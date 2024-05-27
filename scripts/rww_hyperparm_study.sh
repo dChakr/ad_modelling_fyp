@@ -9,12 +9,12 @@ module load tools/prod
 module load SciPy-bundle/2023.07-gfbf-2023a
 pip install optuna
 
-cp -r $HOME/ad_modelling_fyp/whobpyt $TMPDIR
-cp $HOME/ad_modelling_fyp/requirements.txt $TMPDIR
+cp -r $HOME/ad_modelling_fyp/whole_brain_models/whobpyt $TMPDIR
+cp $HOME/ad_modelling_fyp/whole_brain_models/requirements.txt $TMPDIR
 
 pip install -r requirements.txt
 
-cp $HOME/ad_modelling_fyp/data/CN_ADNIMERGE_29Apr2024_wFiles.csv $TMPDIR
+cp $HOME/ad_modelling_fyp/data/data/ADNIMERGE/CN_ADNIMERGE_29Apr2024_wFiles.csv $TMPDIR
 cp $HOME/ad_modelling_fyp/data/DTI_fiber_consensus_HCP.csv $TMPDIR
 
 cp $HOME/ad_modelling_fyp/whole_brain_models/train_rww.py $TMPDIR
