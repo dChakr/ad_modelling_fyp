@@ -34,10 +34,10 @@ def data_pipeline(input_dir, nifty_output_dir, res_output_dir, pet_type):
     schaefer_atlas = datasets.fetch_atlas_schaefer_2018(n_rois=100, yeo_networks=7, )
     schaefer_atlas = schaefer_atlas['maps']
 
-    # for filename in os.listdir(input_dir):
-    #         if filename.endswith(".nii.gz"):
-    #             filepath = os.path.join(input_dir, filename)
-    #             register_to_mni(input_file=filepath, output_file=f'{nifty_output_dir}/{filename}', mni_map=mni_map)
+    for filename in os.listdir(input_dir):
+            if filename.endswith(".nii.gz"):
+                filepath = os.path.join(input_dir, filename)
+                register_to_mni(input_file=filepath, output_file=f'{nifty_output_dir}/{filename}', mni_map=mni_map)
     print('Begin parcellating:')
     for filename in os.listdir(nifty_output_dir):
             if filename.endswith(".nii.gz"):
