@@ -17,7 +17,7 @@ pip install -r requirements.txt
 cp $HOME/ad_modelling_fyp/data/CN_ADNIMERGE_29Apr2024_wFiles.csv $TMPDIR
 cp $HOME/ad_modelling_fyp/data/DTI_fiber_consensus_HCP.csv $TMPDIR
 
-cp $HOME/ad_modelling_fyp/train_rww.py $TMPDIR
+cp $HOME/ad_modelling_fyp/whole_brain_models/train_rww.py $TMPDIR
 cp -r $HOME/FMRI_ADNI_DATA/fc $TMPDIR
 
 python train_rww.py $ARGUMENT 'CN_ADNIMERGE_29Apr2024_wFiles.csv' 'DTI_fiber_consensus_HCP.csv' 150 10
