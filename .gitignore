@@ -6,6 +6,5 @@ logs/
 *.sh.o*
 models/
 whobpyt_dir/
-whobpyt/
 requirements.txt
 nilearn/
