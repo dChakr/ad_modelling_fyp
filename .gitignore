@@ -1,5 +1,4 @@
 nilearn_cache/
-nilearn/
 logs/
 .ipynb_checkpoints/
 *.log
@@ -9,3 +8,4 @@ models/
 whobpyt_dir/
 whobpyt/
 requirements.txt
+nilearn/
