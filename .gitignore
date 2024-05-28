@@ -6,3 +6,4 @@ logs/
 *.sh.o*
 whobpyt_dir/
 nilearn/
+whole_brain_models/whobpyt/
