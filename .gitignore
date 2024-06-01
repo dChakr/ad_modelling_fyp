@@ -6,4 +6,5 @@ logs/
 *.sh.o*
 whobpyt_dir/
 nilearn/
-whole_brain_models/whobpyt/
+whole_brain_models/whobpyt/*/__pycache__/
+data/sub-ADNI002S0413_ses-M084_task-rest_space-MNI152Lin_res-2_desc-preproc_bold_ExtSchaefer116_ROI_activity.mat

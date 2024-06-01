@@ -62,6 +62,13 @@ class Model_fitting(AbstractFitting):
         self.trainingStats = TrainingStats(self.model)
         self.lastRec = None #A dictionary or Recordings of the last simulation preformed (either training or evaluation)
         
+        # sued for early stopping
+        self.best_loss = 5000
+        self.min_delta = 0.01
+        self.wait = 0
+        self.stop = False
+        self.patience = 5
+
         #self.u = None #This is the ML "Training Input"                
         #self.empTS = ts #This is the ML "Training Labels" - A list
 
@@ -74,9 +81,19 @@ class Model_fitting(AbstractFitting):
         """
         with open(filename, 'wb') as f:
             pickle.dump(self, f)
+    
+    def early_stop(self, curr_loss):
+        if curr_loss < self.best_loss - self.min_delta:
+            self.best_loss = curr_loss
+            self.wait = 0
+        else:
+            self.wait += 1
+            if self.wait >= self.patience:
+                self.stop = True
+        return self.stop
 
     def train(self, u, empFcs: list, 
-              num_epochs: int, num_windows: int, learningrate: float = 0.05, lr_2ndLevel: float = 0.05, lr_scheduler: bool = False):
+              num_epochs: int, num_windows: int, learningrate: float = 0.05, lr_2ndLevel: float = 0.05, lr_scheduler: bool = False, early_stopping = False):
         """
         Parameters
         ----------
@@ -136,10 +153,7 @@ class Model_fitting(AbstractFitting):
         
             # TRAINING_STATS: placeholders for the history of trainingStats
             loss_his = []  # loss placeholder to take the average for the epoch at the end of the epoch
-            loss_main_his = []
 
-            print("Epoch: ", i_epoch)
-                   
             # LOOP 2/4: Number of Recordings in the Training Dataset
             for fc_emp in empFcs: 
                 # windowedTS = empRec.windowedTensor(TPperWindow)
@@ -175,7 +189,7 @@ class Model_fitting(AbstractFitting):
                     # ts_window = torch.tensor(windowedTS[win_idx, :, :], dtype=torch.float32)   # replace with the FC
 
                     # calculating loss
-                    loss_main, loss = self.cost.loss(next_window, fc_emp)
+                    loss = self.cost.loss(next_window, fc_emp)
                     
                     # TIME SERIES: Put the window of simulated forward model.
                     for name in set(self.model.state_names + self.model.output_names):
@@ -183,7 +197,6 @@ class Model_fitting(AbstractFitting):
 
                     # TRAINING_STATS: Adding Loss for every training window (corresponding to one backpropagation)
                     loss_his.append(loss.detach().cpu().numpy())
-                    loss_main_his.append(loss_main.detach().cpu().numpy())
 
                     # Calculate gradient using backward (backpropagation) method of the loss function.
                     loss.backward(retain_graph=True)
@@ -196,7 +209,13 @@ class Model_fitting(AbstractFitting):
 
                     # Optimize the model based on the gradient method in updating the model parameters.
                     hyperparameter_optimizer.step()
-                    modelparameter_optimizer.step()
+
+                    if torch.isnan(self.model.gains_con.H).any().item():
+                        print(3)
+                        print(i_epoch)
+                        break  
+
+                    modelparameter_optimizer.step()    # this is what's breaking things
 
                     # DEBUGGER CODE - #TODO: REMOVE
                     if torch.isnan(self.model.gains_con.H).any().item():
@@ -229,7 +248,7 @@ class Model_fitting(AbstractFitting):
                 fc_sim = np.corrcoef(ts_sim[:, 10:])
 
                 print('epoch: ', i_epoch, 
-                      'loss:', loss.detach().cpu().numpy(),
+                    #   'loss:', loss.detach().cpu().numpy(),
                       'Pseudo FC_cor: ', np.corrcoef(fc_sim[mask_e], fc_emp[mask_e])[0, 1]) #Calling this Pseudo as different windows of the time series have slighly different parameter values
                       
                 if lr_scheduler:
@@ -238,7 +257,10 @@ class Model_fitting(AbstractFitting):
                     
             # TRAINING_STATS: Put the updated model parameters into the history placeholders at the end of every epoch.
             # Additing Mean Loss for the Epoch
-            self.trainingStats.appendLoss(np.mean(loss_his), np.mean(loss_main_his))
+            curr_loss = np.mean(loss_his)
+            self.trainingStats.appendLoss(curr_loss)
+
+            print('loss:', curr_loss)
             # NMM/Other Parameter info for the Epoch (a list where a number is recorded every window of every record)            
             trackedParam = {}
             exclude_param = ['gains_con', 'lm'] #This stores SC and LF which are saved seperately
@@ -259,104 +281,14 @@ class Model_fitting(AbstractFitting):
                 self.trainingStats.appendSC(self.model.sc_fitted.detach().cpu().numpy())
             if self.model.use_fit_lfm:
                 self.trainingStats.appendLF(self.model.lm.detach().cpu().numpy())
+
+            if early_stopping & self.early_stop(curr_loss):
+                break
         
         # Saving the last recording of training as a Model_fitting attribute
         self.lastRec = {}
         for name in set(self.model.state_names + self.model.output_names):
             self.lastRec[name] = Recording(windListDict[name], step_size = self.model.step_size) #TODO: This won't work if different variables have different step sizes
-
-    # def evaluate(self, u, empRecs: list, TPperWindow: int, base_window_num: int = 0, transient_num: int = 10): 
-    #     """
-    #     Parameters
-    #     ----------
-    #     u : int or Tensor
-    #         external or stimulus
-    #     empRec: list of Recording
-    #         This is the ML "Training Labels"
-    #     TPperWindow: int
-    #         Number of Empirical Time Points per window. model.forward does one window at a time.  
-    #     base_window_num : int
-    #         length of num_windows for resting
-    #     transient_num : int
-    #         The number of initial time points to exclude from some metrics
-    #     -----------
-    #     """
-    #     method_arg_type_check(self.evaluate, exclude = ['u']) # Check that the passed arguments (excluding self) abide by their expected data types
-    #     #TODO: Should be updated to take a list of u and empRec
-
-    #     fc_cor_his = []  # placeholder (FC correlation) to take the average across the recordings
-    #     cos_sim_his = [] # placeholder (Correlation Sim) to take the average across the recordings
-                   
-    #     # LOOP 1/3: Number of Empirical BOLD recordings
-    #     for empRec in empRecs: 
-
-    #         # initial state
-    #         X = self.model.createIC(ver = 1)
-    #         # initials of history of E
-    #         hE = self.model.createDelayIC(ver = 1)
-
-    #         # define mask for getting lower triangle matrix
-    #         mask = np.tril_indices(self.model.node_size, -1)
-    #         mask_e = np.tril_indices(self.model.output_size, -1)
-            
-    #         # Create placeholders for the simulated states and outputs of entire time series corresponding to one recording
-    #         windListDict = {} # A Dictionary with a List of windowed time series
-    #         for name in set(self.model.state_names + self.model.output_names):
-    #             windListDict[name] = []
-
-    #         num_windows = int(empRec.length/TPperWindow)
-    #         u_hat = np.zeros(
-    #             (self.model.node_size,self.model.steps_per_TR,
-    #             base_window_num*self.model.TRs_per_window + num_windows*self.model.TRs_per_window))
-    #         u_hat[:, :, base_window_num * self.model.TRs_per_window:] = u
-
-    #         # LOOP 1/2: The number of windows in a recording
-    #         for win_idx in range(num_windows + base_window_num):
-
-    #             # Get the input and output noises for the module.
-    #             external = torch.tensor(
-    #                 (u_hat[:, :, win_idx * self.model.TRs_per_window:(win_idx + 1) * self.model.TRs_per_window]),
-    #                 dtype=torch.float32)
-
-    #             # LOOP 2/2: The loop within the forward model (numerical solver), which is number of time points per windowed segment
-    #             next_window, hE_new = self.model.forward(external, X, hE)
-
-    #             # TIME SERIES: Put the window of simulated forward model.
-    #             if win_idx > base_window_num - 1:
-    #                 for name in set(self.model.state_names + self.model.output_names):
-    #                     windListDict[name].append(next_window[name].detach().cpu().numpy())
-
-    #             # last update current state using next state...
-    #             # (no direct use X = X_next, since gradient calculation only depends on one batch no history)
-    #             X = next_window['current_state'].detach().clone() # dtype=torch.float32
-    #             hE = hE_new.detach().clone() #dtype=torch.float32
-            
-    #         windowedTS = empRec.windowedTensor(TPperWindow)
-    #         ts_emp = np.concatenate(list(windowedTS),1) #TODO: Check this code
-    #         fc = np.corrcoef(ts_emp)
-            
-    #         # TIME SERIES: Concatenate all windows together to get one recording
-    #         for name in set(self.model.state_names + self.model.output_names):
-    #             windListDict[name] = np.concatenate(windListDict[name], axis=1)
-            
-    #         ts_sim = windListDict[self.model.output_names[0]]
-    #         fc_sim = np.corrcoef(ts_sim[:, transient_num:])
-
-    #         fc_cor = np.corrcoef(fc_sim[mask_e], fc[mask_e])[0, 1]
-    #         cos_sim = np.diag(cosine_similarity(ts_sim, ts_emp)).mean()
-            
-    #         print('FC_cor: ', fc_cor, 
-    #             'cos_sim: ', cos_sim)
-            
-    #         fc_cor_his.append(fc_cor)
-    #         cos_sim_his.append(cos_sim)
-
-    #         # Saving the last recording of training as a Model_fitting attribute
-    #         self.lastRec = {}
-    #         for name in set(self.model.state_names + self.model.output_names):
-    #             self.lastRec[name] = Recording(windListDict[name], step_size = self.model.step_size) #TODO: This won't work if different variables have different step sizes
-        
-    #     return np.mean(fc_cor), np.mean(cos_sim)
 
     def evaluate(self, empFcs: list, fc_sims : list): 
         """
@@ -418,10 +350,6 @@ class Model_fitting(AbstractFitting):
         X = self.model.createIC(ver = 1)
         # initials of history of E
         hE = self.model.createDelayIC(ver = 1)
-
-        # define mask for getting lower triangle matrix
-        # mask = np.tril_indices(self.model.node_size, -1)
-        # mask_e = np.tril_indices(self.model.output_size, -1)
         
         # Create placeholders for the simulated states and outputs of entire time series corresponding to one recording
         windListDict = {} # A Dictionary with a List of windowed time series

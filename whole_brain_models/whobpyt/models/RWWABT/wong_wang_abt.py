@@ -5,6 +5,7 @@ Neural Mass Model fitting module for Wong-Wang model
 
 import torch
 from torch.nn.parameter import Parameter
+from torch.nn import Softplus
 from whobpyt.datatypes import AbstractNMM, AbstractParams, par
 from whobpyt.models.RWW import ParamsRWW
 from whobpyt.functions.arg_type_check import method_arg_type_check
@@ -274,23 +275,23 @@ def h_tf(a, b, d, z, M):
     """
     M = M.unsqueeze(1).expand_as(z)
 
-    num = 0.00001 + torch.abs(M * (a * z - b))
-    # num = 0.00001 + torch.abs(1 * (a * z - b))
-    den = 0.00001 * d + torch.abs(1.0000 - torch.exp(-d * M * (a * z - b)))
-    # den = 0.00001 * d + torch.abs(1.0000 - torch.exp(-d * 1 * (a * z - b)))
-    return torch.divide(num, den)
+    # input to softplus, x
+    x = M * (a * z - b)
+
+    # sharpness parameter
+    ln2 = torch.log(torch.tensor(2.0))
+    k = d * ln2
+
+    softplus = Softplus(beta=k, threshold=30)   # play around with the threshold function here too
+
+    return softplus(x)
 
 def calc_gain_factor(b_AB, s_AB, AB, b_t, s_t, tau):
     """
     Calculates the gain factor M for the neuronal response function 
 
-    Returns tensor M of dim node_size (???)
+    Returns tensor M of dim node_size 
     """
-    # print('b_AB: ', b_AB)
-    # print('s_AB: ', s_AB)
-    # print('b_t: ', b_t)
-    # print('s_t: ', s_t)
-
     return (1 + b_AB + s_AB * AB) * (1 + b_t + s_t * tau)
 
 def setModelParameters(model):

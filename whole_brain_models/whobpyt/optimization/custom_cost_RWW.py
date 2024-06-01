@@ -109,5 +109,5 @@ class CostsRWW(AbstractLoss):
           
         # total loss
         loss = w_cost * loss_main + sum(loss_prior) + 1 * loss_EI
-        # loss = w_cost * loss_main
-        return loss_main, loss
+        
+        return loss

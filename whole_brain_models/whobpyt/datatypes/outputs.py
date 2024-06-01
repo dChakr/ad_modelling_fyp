@@ -51,7 +51,6 @@ class TrainingStats:
         self.track_params = model.track_params
 
         self.loss = []
-        self.main_loss = []
 
         self.connectivity = []
         self.leadfield = []
@@ -83,7 +82,7 @@ class TrainingStats:
 
         self.fit_params = {}
 
-    def appendLoss(self, newValue, newValueMain):
+    def appendLoss(self, newValue):
         """ 
         Append Trainig Loss
 
@@ -94,7 +93,6 @@ class TrainingStats:
         
         """
         self.loss.append(newValue)
-        self.main_loss.append(newValueMain)
         
     def appendSC(self, newValue):
         """ 
