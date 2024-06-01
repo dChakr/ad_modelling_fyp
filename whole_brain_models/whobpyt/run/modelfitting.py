@@ -93,7 +93,9 @@ class Model_fitting(AbstractFitting):
         return self.stop
 
     def train(self, u, empFcs: list, 
-              num_epochs: int, num_windows: int, learningrate: float = 0.05, lr_2ndLevel: float = 0.05, lr_scheduler: bool = False, early_stopping = False):
+              num_epochs: int, num_windows: int, learningrate: float = 0.05, 
+              lr_2ndLevel: float = 0.05, lr_scheduler: bool = False, 
+              early_stopping = False, softplus_threshold = 20):
         """
         Parameters
         ----------
@@ -183,7 +185,7 @@ class Model_fitting(AbstractFitting):
                             dtype=torch.float32)
 
                     # LOOP 4/4: The loop within the forward model (numerical solver), which is number of time points per windowed segment
-                    next_window, hE_new = self.model(external, X, hE)
+                    next_window, hE_new = self.model(external, X, hE, softplus_threshold)
 
                     # Get the b atch of empirical signal.
                     # ts_window = torch.tensor(windowedTS[win_idx, :, :], dtype=torch.float32)   # replace with the FC

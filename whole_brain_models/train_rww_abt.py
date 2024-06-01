@@ -14,7 +14,11 @@ import torch
 
 def get_data(DATA_PATH, pgroup = 'CN'):
     patients = pd.read_csv(DATA_PATH)
-    patients = patients[patients['DX_bl'] == pgroup]
+
+    if pgroup == 'MCI':
+        patients = patients[patients['DX_bl'].isin(['EMCI', 'LMCI'])]
+    else:    
+        patients = patients[patients['DX_bl'] == pgroup]
 
     fcs = []
 
@@ -53,16 +57,19 @@ def get_avg_fmr(fmris):
     
     return avg_corr
 
-def train_model(fc_emp_train, fc_emp_test, num_epochs, learning_rate, bAB_E, sAB_E, bt_E, st_E, bAB_I, sAB_I, ts_length, node_size=100):
+def train_model(fc_emp_train, fc_emp_test, learning_rate, bAB_E, sAB_E, bt_E, st_E, bAB_I, sAB_I, softplus_threshold, node_size=100):
+    
     params = ParamsRWWABT(bAB_E=par(val=bAB_E, fit_par=True), sAB_E=par(val=sAB_E, fit_par=True), bt_E=par(val=bt_E, fit_par=True),
                       st_E=par(val=st_E, fit_par=True), bAB_I=par(val=bAB_I, fit_par=True), sAB_I=par(val=sAB_I, fit_par=True))
     
+    print(params)
+
     TPperWindow = 20
     step_size = 0.1
     repeat_size = 5
 
     # call model want to fit
-    model = RNNRWWABT(node_size, TPperWindow, step_size, repeat_size, tr, sc, abeta, tau, use_fit_gains=True, params=params)
+    model = RNNRWWABT(node_size, TPperWindow, step_size, repeat_size, tr, sc, abeta, tau, True, params)
 
     # create objective function
     ObjFun = CostsRWW(model)
@@ -71,7 +78,11 @@ def train_model(fc_emp_train, fc_emp_test, num_epochs, learning_rate, bAB_E, sAB
     F = Model_fitting(model, ObjFun)
 
     # Train on training set
-    F.train(u = 0, empFcs= [fc_emp_train], num_epochs = num_epochs, num_windows = int(ts_length / TPperWindow), learningrate = learning_rate)
+    F.train(
+        u = 0, empFcs= [fc_emp_train], num_epochs = 50, 
+            num_windows = int(ts_length / TPperWindow), learningrate = learning_rate, 
+            early_stopping=True, softplus_threshold=softplus_threshold
+    )
 
     # Test on test set
     _, fc_sim = F.simulate(u = 0, num_windows=int(ts_length/TPperWindow), base_window_num = 20)
@@ -82,12 +93,18 @@ def train_model(fc_emp_train, fc_emp_test, num_epochs, learning_rate, bAB_E, sAB
 
 def objective(trial):
     learning_rate = trial.suggest_categorical('learning_rate', [0.001, 0.01, 0.05, 0.1])
-    num_epochs = trial.suggest_categorical('num_epochs', [20, 50, 100])
-    step_size = trial.suggest_categorical('step_size', [0.01, 0.05, 0.1])
-    g = trial.suggest_categorical('G', [20, 50, 80, 100, 500, 1000])
-    tp_per_window = trial.suggest_categorical('TPperWindow', [5, 10, 20, 50])
+    bAB_E = trial.suggest_float('bAB_E', -10.0, 10.0)
+    sAB_E = trial.suggest_float('sAB_E', 0, 10.0)   # > 0
+    bt_E = trial.suggest_float('bt_E', -10.0, 10.0)
+    st_E = trial.suggest_float('st_E', -10.0, 0.0)  # < 0
+    bAB_I = trial.suggest_float('bAB_I', -10.0, 10.0)
+    sAB_I = trial.suggest_float('sAB_I', -10.0, 0.0)    # < 0
+    softplus_threshold = trial.suggest_int('softplus_threshold', 10, 100)
 
-    score = train_model(fc_emp_train=torch.from_numpy(fc_emp_train), fc_emp_test=fc_emp_test, g=g, num_epochs=num_epochs, ts_length=ts_length, learning_rate=learning_rate)
+    score = train_model(fc_emp_train=torch.from_numpy(fc_emp_train), fc_emp_test=fc_emp_test, learning_rate=learning_rate,
+                bAB_E=bAB_E, sAB_E=sAB_E, bt_E=bt_E, st_E=st_E, bAB_I=bAB_I, sAB_I=sAB_I, 
+                softplus_threshold = softplus_threshold
+            )
     return score
 
 if __name__ == '__main__':
@@ -95,14 +112,14 @@ if __name__ == '__main__':
     # patient group
     pgroup = sys.argv[2]
 
-    # assume that these files are in the directory we're working in
-    ADNI_MERGE_PATH = 'ADNIMERGE_29Apr2024_wFiles.csv'
+    # assume that these files are in the directory we're working in (adapted to be)
+    ADNI_MERGE_PATH = 'ADNIMERGE_29Apr2024_wFiles_mod.csv'
     SC_PATH = 'DTI_fiber_consensus_HCP.csv'
     ABETA_PATH = f'AB_{pgroup}.csv'
     TAU_PATH = f'TAU_{pgroup}.csv'
 
-    optuna_trials = int(sys.argv[4])
-    no_jobs = int(sys.argv[5])
+    optuna_trials = int(sys.argv[3])
+    no_jobs = int(sys.argv[4])
 
     # GET ADDITIONAL DATA: SC, A-BETA and TAU
     # normalise structural connectivity matrix
