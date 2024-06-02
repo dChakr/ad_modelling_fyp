@@ -239,7 +239,7 @@ class RNNRWWABT(AbstractNMM):
         # set states E I f v mean and 1/sqrt(variance)
         return setModelParameters(self)
 
-    def forward(self, external, hx, hE):
+    def forward(self, external, hx, hE, softplus_threshold=20):
         """
         
         Forward step in simulating the BOLD signal.
@@ -262,9 +262,9 @@ class RNNRWWABT(AbstractNMM):
             
         """
         
-        return integration_forward(self, external, hx, hE)
+        return integration_forward(self, external, hx, hE, softplus_threshold)
 
-def h_tf(a, b, d, z, M):
+def h_tf(a, b, d, z, M, softplus_threshold):
     """
     Neuronal input-output functions of excitatory pools and inhibitory pools.
     Take the variables a, x, and b and convert them to a linear equation (a*x - b) while adding a small
@@ -282,7 +282,7 @@ def h_tf(a, b, d, z, M):
     ln2 = torch.log(torch.tensor(2.0))
     k = d * ln2
 
-    softplus = Softplus(beta=k, threshold=30)   # play around with the threshold function here too
+    softplus = Softplus(beta=k, threshold=softplus_threshold)   # play around with the threshold function here too
 
     return softplus(x)
 
@@ -357,7 +357,7 @@ def setModelParameters(model):
 
     model.params_fitted = {'modelparameter': param_reg,'hyperparameter': param_hyper}
 
-def integration_forward(model, external, hx, hE):
+def integration_forward(model, external, hx, hE, softplus_threshold = 20):
 
     # Generate the ReLU module for model parameters gEE gEI and gIE
     m = torch.nn.ReLU()
@@ -487,8 +487,8 @@ def integration_forward(model, external, hx, hE):
                 mI = calc_gain_factor(bAB_I, sAB_I, model.ab, bt_I, st_I, model.tau)
                 
                 # Calculate the firing rates.
-                rE = h_tf(aE, bE, dE, IE, mE)  # firing rate for E
-                rI = h_tf(aI, bI, dI, II, mI)  # firing rate for I
+                rE = h_tf(aE, bE, dE, IE, mE, softplus_threshold)  # firing rate for E
+                rI = h_tf(aI, bI, dI, II, mI, softplus_threshold)  # firing rate for I
                 
                 # Update the states by step-size 0.05.
                 E_next = E + dt * (-E * torch.reciprocal(tau_E) + gamma_E * (1. - E) * rE) \
