@@ -93,12 +93,12 @@ def train_model(fc_emp_train, fc_emp_test, learning_rate, bAB_E, sAB_E, bt_E, st
 
 def objective(trial):
     learning_rate = trial.suggest_categorical('learning_rate', [0.001, 0.01, 0.05, 0.1])
-    bAB_E = trial.suggest_float('bAB_E', -10.0, 10.0)
-    sAB_E = trial.suggest_float('sAB_E', 0, 10.0)   # > 0
-    bt_E = trial.suggest_float('bt_E', -10.0, 10.0)
-    st_E = trial.suggest_float('st_E', -10.0, 0.0)  # < 0
-    bAB_I = trial.suggest_float('bAB_I', -10.0, 10.0)
-    sAB_I = trial.suggest_float('sAB_I', -10.0, 0.0)    # < 0
+    bAB_E = trial.suggest_float('bAB_E', -5.0, 5.0)
+    sAB_E = trial.suggest_float('sAB_E', 0, 5.0)   # > 0
+    bt_E = trial.suggest_float('bt_E', -5.0, 5.0)
+    st_E = trial.suggest_float('st_E', -5.0, 0.0)  # < 0
+    bAB_I = trial.suggest_float('bAB_I', -5.0, 5.0)
+    sAB_I = trial.suggest_float('sAB_I', -10.0, -5.0)    # < 0
     softplus_threshold = trial.suggest_int('softplus_threshold', 10, 100)
 
     score = train_model(fc_emp_train=torch.from_numpy(fc_emp_train), fc_emp_test=fc_emp_test, learning_rate=learning_rate,
