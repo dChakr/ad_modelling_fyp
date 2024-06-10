@@ -57,28 +57,20 @@ def get_data(DATA_PATH, pgroup = 'CN'):
 
     return train_data, test_data
 
-def get_hyperparams(hyperparam_file):
-    with open(hyperparam_file) as file:
-        hyperparams = json.load(file)
-        
-        hyperparams = hyperparams['params']
-        return hyperparams
-
-def set_up_model(hyperparams):
+def set_up_model(sAB_E):
     node_size = 100
     TPperWindow = 20
     step_size = 0.1
     repeat_size = 5
     tr = 0.75
 
-    bAB_E = hyperparams['bAB_E']
-    sAB_E = hyperparams['sAB_E']
-    bt_E = hyperparams['bt_E']
-    st_E = hyperparams['st_E']
-    bAB_I = hyperparams['bAB_I']
-    bAB_I = -0.5
-    # sAB_I = hyperparams['sAB_I']
-    sAB_I = -3
+    bAB_E = 0.7911694161593914
+    sAB_E = sAB_E
+    bt_E = 0.6965176403522492
+    st_E =  -0.6802110966295004
+    bAB_I = -3.8016204237937927
+    sAB_I = -7.907003617286682
+    # sAB_I = -3
     
     params = ParamsRWWABT(bAB_E=par(val=bAB_E, fit_par=True), sAB_E=par(val=sAB_E, fit_par=True), bt_E=par(val=bt_E, fit_par=True),
                       st_E=par(val=st_E, fit_par=True), bAB_I=par(val=bAB_I, fit_par=True), sAB_I=par(val=sAB_I, fit_par=True))
@@ -88,20 +80,18 @@ def set_up_model(hyperparams):
 
     return model, ObjFun
 
-def train(fc_emp_train, ts_length, hyperparams, model, ObjFun):
+def train(fc_emp_train, ts_length, model, ObjFun):
     num_epochs = 50
     TPperWindow = 20
 
-    lr = hyperparams['learning_rate']
-    sp_threshold = hyperparams['softplus_threshold']
-
+    lr = 0.05
+    sp_threshold = 31
 
     F = Model_fitting(model, ObjFun)
     F.train(u = 0, empFcs = [torch.from_numpy(fc_emp_train)], num_epochs = num_epochs, 
         num_windows = int(ts_length / TPperWindow), learningrate = lr, early_stopping=True, softplus_threshold = sp_threshold)
     
     return F.trainingStats.fit_params
-
 
 if __name__ == '__main__':
     # patient group
@@ -112,7 +102,7 @@ if __name__ == '__main__':
     SC_PATH = 'DTI_fiber_consensus_HCP.csv'
     ABETA_PATH = f'AB_{pgroup}.csv'
     TAU_PATH = f'TAU_{pgroup}.csv'
-    HYPERPARAM_PATH = f'optuna_{pgroup}_study_2.json'
+    HYPERPARAM_PATH = f'optuna_{pgroup}_study.json'
 
     sc = np.genfromtxt(SC_PATH, delimiter=',')
 
@@ -132,8 +122,9 @@ if __name__ == '__main__':
     fc_emp_train = get_avg_fc(train_data)
     fc_emp_test = get_avg_fc(test_data)
 
-    hyperparams = get_hyperparams(HYPERPARAM_PATH)
-    model, ObjFun = set_up_model(hyperparams)
+    # hyperparams = get_hyperparams(HYPERPARAM_PATH)
+    # "learning_rate": 0.05, "bAB_E": 0.4320991563612215, "sAB_E": 0.36044967919996074, "bt_E": -0.6482380264178235, "st_E": -2.7855677723437537, "bAB_I": 4.070509035464725, "sAB_I": -0.5657252924120897, "softplus_threshold": 31
+    model, ObjFun = set_up_model(sAB_E)
 
     bAB_Es = np.zeros(20)
     sAB_Es = np.zeros(20)
@@ -144,18 +135,4 @@ if __name__ == '__main__':
 
 
     for i in range(20):
-        fitted_params = train(fc_emp_train, ts_length, hyperparams, model, ObjFun)
-        
-        bAB_Es[i] = (fitted_params['bAB_E'][-1])
-        sAB_Es[i] = (fitted_params['sAB_E'][-1])
-        bAB_Is[i] = (fitted_params['bAB_I'][-1])
-        sAB_Is[i] = (fitted_params['sAB_I'][-1])
-        bt_Es[i] = (fitted_params['bt_E'][-1])
-        st_Es[i] = (fitted_params['st_E'][-1])
-    
-    np.savetxt(f'bAB_E_{pgroup}.txt', bAB_Es)
-    np.savetxt(f'sAB_E_{pgroup}.txt', sAB_Es)
-    np.savetxt(f'bAB_I_{pgroup}.txt', bAB_Is)
-    np.savetxt(f'sAB_I_{pgroup}.txt', sAB_Is)
-    np.savetxt(f'bt_E_{pgroup}.txt', bt_Es)
-    np.savetxt(f'st_E_{pgroup}.txt', st_Es)
+        pass

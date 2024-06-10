@@ -18,7 +18,7 @@ cp $HOME/ad_modelling_fyp/data/DTI_fiber_consensus_HCP.csv $TMPDIR
 
 cp $HOME/ad_modelling_fyp/data/avg_scans/AB_$PGROUP.csv $TMPDIR
 cp $HOME/ad_modelling_fyp/data/avg_scans/TAU_$PGROUP.csv $TMPDIR
-cp $HOME/ad_modelling_fyp/data/optuna_trials/optuna_$PGROUP\_study.json $TMPDIR
+cp $HOME/ad_modelling_fyp/data/optuna_trials/optuna_$PGROUP\_study_2.json $TMPDIR
 cp $HOME/ad_modelling_fyp/whole_brain_models/get_fitted_abeta_vals.py $TMPDIR
 cp -r $HOME/FMRI_ADNI_DATA/fc $TMPDIR
 
