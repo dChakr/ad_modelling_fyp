@@ -185,8 +185,8 @@ class Model_fitting(AbstractFitting):
                             dtype=torch.float32)
 
                     # LOOP 4/4: The loop within the forward model (numerical solver), which is number of time points per windowed segment
-#                     next_window, hE_new = self.model(external, X, hE, softplus_threshold)
-                    next_window, hE_new = self.model(external, X, hE)
+                    next_window, hE_new = self.model(external, X, hE, softplus_threshold)
+                    # next_window, hE_new = self.model(external, X, hE)
 
                     # Get the b atch of empirical signal.
                     # ts_window = torch.tensor(windowedTS[win_idx, :, :], dtype=torch.float32)   # replace with the FC

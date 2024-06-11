@@ -137,7 +137,7 @@ class RNNRWWABT(AbstractNMM):
         self.output_names = ["bold"]
         self.track_params = [] #Is populated during setModelParameters()
         
-        self.model_name = "RWW"
+        self.model_name = "RWWABT"
         self.state_size = 6  # 6 states WWD model
         # self.input_size = input_size  # 1 or 2
         self.tr = tr  # tr fMRI image

@@ -4,6 +4,7 @@ from whobpyt.optimization.custom_cost_RWW import CostsRWW
 from whobpyt.run import Model_fitting
 from sklearn.model_selection import train_test_split
 import sys
+import pickle
 
 # array and pd stuff
 import numpy as np
@@ -11,6 +12,8 @@ import pandas as pd
 from scipy.io import loadmat # for reading in the .mat files
 import torch
 import json
+
+import matplotlib.pyplot as plt
 
 def get_avg_fc(fcs):
     corr_matrices = []
@@ -64,13 +67,12 @@ def set_up_model(sAB_E):
     repeat_size = 5
     tr = 0.75
 
-    bAB_E = 0.7911694161593914
+    bAB_E = 0.4320991563612215
     sAB_E = sAB_E
-    bt_E = 0.6965176403522492
-    st_E =  -0.6802110966295004
-    bAB_I = -3.8016204237937927
-    sAB_I = -7.907003617286682
-    # sAB_I = -3
+    bt_E = -0.6482380264178235
+    st_E =  -2.7855677723437537
+    bAB_I = -0.5
+    sAB_I = -3
     
     params = ParamsRWWABT(bAB_E=par(val=bAB_E, fit_par=True), sAB_E=par(val=sAB_E, fit_par=True), bt_E=par(val=bt_E, fit_par=True),
                       st_E=par(val=st_E, fit_par=True), bAB_I=par(val=bAB_I, fit_par=True), sAB_I=par(val=sAB_I, fit_par=True))
@@ -80,7 +82,7 @@ def set_up_model(sAB_E):
 
     return model, ObjFun
 
-def train(fc_emp_train, ts_length, model, ObjFun):
+def train_and_simulate(fc_emp_train, ts_length, model, ObjFun):
     num_epochs = 50
     TPperWindow = 20
 
@@ -91,18 +93,36 @@ def train(fc_emp_train, ts_length, model, ObjFun):
     F.train(u = 0, empFcs = [torch.from_numpy(fc_emp_train)], num_epochs = num_epochs, 
         num_windows = int(ts_length / TPperWindow), learningrate = lr, early_stopping=True, softplus_threshold = sp_threshold)
     
-    return F.trainingStats.fit_params
+    _, fc_sim = F.simulate(u =0, num_windows=int(ts_length / TPperWindow), base_window_num=20)
+    
+    return fc_sim
+
+def compute_fc_lower_triangle(fc, node_size=100):
+    # Get the lower triangle
+    mask_e = np.tril_indices(node_size, -1)
+    lower_triangle = fc[mask_e]
+    
+    return lower_triangle
+
+def plot_predictions(sAB_Es, prediced_vs, filename):
+    plt.plot(sAB_Es, prediced_vs)
+    plt.figure(figsize=(12,8))
+    plt.title('Predicted Ventricular_ICV Value for CN Patient, Varying sAB_E')
+    plt.xlabel('sAB_E Value')
+    plt.ylabel('Ventricular_ICV')
+    plt.savefig(filename)
+    
 
 if __name__ == '__main__':
-    # patient group
-    pgroup = sys.argv[1]
-
     # assume that these files are in the directory we're working in (adapted to be)
     ADNI_MERGE_PATH = 'ADNIMERGE_29Apr2024_wFiles_mod.csv'
     SC_PATH = 'DTI_fiber_consensus_HCP.csv'
-    ABETA_PATH = f'AB_{pgroup}.csv'
-    TAU_PATH = f'TAU_{pgroup}.csv'
-    HYPERPARAM_PATH = f'optuna_{pgroup}_study.json'
+    ABETA_PATH = f'AB_CN.csv'
+    TAU_PATH = f'TAU_CN.csv'
+    PREDICTOR_PATH = 'gbregressor_ventricular_icv.pkl'   # '../predictors/gbregressor_ventricular_icv.pkl'
+
+    with open(PREDICTOR_PATH, 'rb') as f:
+        predictor = pickle.load(f)
 
     sc = np.genfromtxt(SC_PATH, delimiter=',')
 
@@ -116,23 +136,32 @@ if __name__ == '__main__':
     tau = torch.tensor(tau_file, dtype=torch.float32)
 
     # get functional connectivity data
-    train_data, test_data = get_data(ADNI_MERGE_PATH, pgroup=pgroup)
+    train_data, test_data = get_data(ADNI_MERGE_PATH)
     
     ts_length = train_data[0].shape[0]
     fc_emp_train = get_avg_fc(train_data)
     fc_emp_test = get_avg_fc(test_data)
 
-    # hyperparams = get_hyperparams(HYPERPARAM_PATH)
-    # "learning_rate": 0.05, "bAB_E": 0.4320991563612215, "sAB_E": 0.36044967919996074, "bt_E": -0.6482380264178235, "st_E": -2.7855677723437537, "bAB_I": 4.070509035464725, "sAB_I": -0.5657252924120897, "softplus_threshold": 31
-    model, ObjFun = set_up_model(sAB_E)
+    sAB_Es = np.linspace(0.3, 4, 15)
+    prediced_vs = []
 
-    bAB_Es = np.zeros(20)
-    sAB_Es = np.zeros(20)
-    bAB_Is = np.zeros(20)
-    sAB_Is = np.zeros(20)
-    bt_Es = np.zeros(20)
-    st_Es = np.zeros(20)
+    # -8, 9, 
+    for sAB_E in sAB_Es:
+        model, ObjFun = set_up_model(sAB_E)
+        simulations = []
 
+        # find the average accross sims
+        for i in range(25):
+            fc_sim = train_and_simulate(fc_emp_train, ts_length, model, ObjFun)
+            lower_triangle_fc = compute_fc_lower_triangle(fc_sim)
+            simulations.append(lower_triangle_fc)
+            
+        v = predictor.predict(simulations)
+        prediced_vs.append(np.mean(v))
+    
+    prediced_vs = np.array(prediced_vs)
 
-    for i in range(20):
-        pass
+    np.savetxt('trialled_sAB_E.txt', sAB_Es)
+    np.savetxt('predicted_ventr_icv_sAB_E.txt', prediced_vs)
+
+    plot_predictions(sAB_Es, prediced_vs, 'predicted_ventr_icv_sAB_E_plot.png')
