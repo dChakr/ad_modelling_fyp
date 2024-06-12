@@ -14,6 +14,7 @@ import torch
 import json
 
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 def get_avg_fc(fcs):
     corr_matrices = []
@@ -105,8 +106,8 @@ def compute_fc_lower_triangle(fc, node_size=100):
     return lower_triangle
 
 def plot_predictions(sAB_Es, prediced_vs, filename):
-    plt.figure(figsize=(12,8))
-    plt.plot(sAB_Es, prediced_vs)
+    plt.figure(figsize=(8,6))
+    sns.regplot(x=sAB_Es, y=prediced_vs, line_kws={'color':'red'}, scatter_kws={'s':10})
     plt.title('Predicted Ventricular_ICV Value for CN Patient, Varying sAB_E')
     plt.xlabel('sAB_E Value')
     plt.ylabel('Ventricular_ICV')
@@ -142,7 +143,7 @@ if __name__ == '__main__':
     fc_emp_train = get_avg_fc(train_data)
     fc_emp_test = get_avg_fc(test_data)
 
-    sAB_Es = np.linspace(0.3, 4, 15)
+    sAB_Es = np.arange(-8, 9, 0.5) # change to be random for the range 
     prediced_vs = []
 
     # -8, 9, 
@@ -151,7 +152,7 @@ if __name__ == '__main__':
         simulations = []
 
         # find the average accross sims
-        for i in range(25):
+        for i in range(25):  # could average 5 and randomly sample more
             fc_sim = train_and_simulate(fc_emp_train, ts_length, model, ObjFun)
             lower_triangle_fc = compute_fc_lower_triangle(fc_sim)
             simulations.append(lower_triangle_fc)
