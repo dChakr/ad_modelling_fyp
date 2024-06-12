@@ -105,8 +105,8 @@ def compute_fc_lower_triangle(fc, node_size=100):
     return lower_triangle
 
 def plot_predictions(sAB_Es, prediced_vs, filename):
-    plt.plot(sAB_Es, prediced_vs)
     plt.figure(figsize=(12,8))
+    plt.plot(sAB_Es, prediced_vs)
     plt.title('Predicted Ventricular_ICV Value for CN Patient, Varying sAB_E')
     plt.xlabel('sAB_E Value')
     plt.ylabel('Ventricular_ICV')
