@@ -45,7 +45,7 @@ def compute_fc_lower_triangle(fc, node_size=100):
 def plot_predictions(sAB_Es, prediced_vs, filename):
     plt.figure(figsize=(8,6))
     sns.regplot(x=sAB_Es, y=prediced_vs, line_kws={'color':'red'}, scatter_kws={'s':10})
-    plt.title('Predicted Ventricular_ICV Value from CN Model Simulations, Varying sAB_I (CN SC Matrix)')
+    plt.title('Predicted Ventricular_ICV Value from CN Model Simulations, Varying both sAB_E and sAB_I (AD SC Matrix)')
     plt.xlabel('sAB_I Value')
     plt.ylabel('Ventricular_ICV')
     plt.savefig(filename)
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     ad_fitted_sc = ad_model.model.sc_fitted.detach().numpy()
 
     cn_fitted_bAB_E = cn_model.trainingStats.fit_params['bAB_E'][-1]
-    cn_fitted_sAB_E = cn_model.trainingStats.fit_params['sAB_E'][-1]
+    # cn_fitted_sAB_E = cn_model.trainingStats.fit_params['sAB_E'][-1]
     cn_fitted_bt_E = cn_model.trainingStats.fit_params['bt_E'][-1]
     cn_fitted_st_E = cn_model.trainingStats.fit_params['st_E'][-1]
     cn_fitted_bAB_I = cn_model.trainingStats.fit_params['bAB_I'][-1]
@@ -88,16 +88,20 @@ if __name__ == '__main__':
 
     # Set up experiment
     np.random.seed(42)  # Setting the seed for reproducibility
-    # sAB_Es = np.random.uniform(low=-8, high=9, size=200)
-    sAB_Is = np.random.uniform(low=-13.5, high=-3.6, size=200)
+    sAB_Es = np.random.uniform(low=2.45, high=9.17, size=200)
+    sAB_Es = np.sort(sAB_Es)
+    sAB_Is = np.random.uniform(low=-11, high=-4.88, size=200)
+    sAB_Is = np.sort(sAB_Is)[::-1]
+
+    param_pairs = list(zip(sAB_Es, sAB_Is))
 
     prediced_vs = []
 
-    for sAB_I in sAB_Is:
+    for (sAB_E, sAB_I) in param_pairs:
         param_set = {
-            'fitted_sc': cn_fitted_sc,
+            'fitted_sc': ad_fitted_sc,
             'fitted_bAB_E': cn_fitted_bAB_E, 
-            'fitted_sAB_E': cn_fitted_sAB_E, 
+            'fitted_sAB_E': sAB_E, 
             'fitted_bt_E': cn_fitted_bt_E, 
             'fitted_st_E': cn_fitted_st_E, 
             'fitted_bAB_I': cn_fitted_bAB_I, 
@@ -117,7 +121,7 @@ if __name__ == '__main__':
         prediced_vs.append(np.mean(v))
     
     prediced_vs = np.array(prediced_vs)
-    np.savetxt('trialled_sAB_I_CN_sc.txt', sAB_Is)
-    np.savetxt('predicted_ventr_icv_sAB_I_CN_sc.txt', prediced_vs)
+    np.savetxt('trialled_sAB_E_and_I_AD_sc.txt', sAB_Is)
+    np.savetxt('predicted_ventr_icv_sAB_E_and_I_AD_sc.txt', prediced_vs)
 
-    plot_predictions(sAB_Is, prediced_vs, 'predicted_ventr_icv_sAB_I_CN_sc_plot.png')
+    plot_predictions(sAB_Is, prediced_vs, 'predicted_ventr_icv_sAB_E_and_I_AD_sc_plot.png')
