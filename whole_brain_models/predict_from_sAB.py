@@ -45,8 +45,8 @@ def compute_fc_lower_triangle(fc, node_size=100):
 def plot_predictions(sAB_Es, prediced_vs, filename):
     plt.figure(figsize=(8,6))
     sns.regplot(x=sAB_Es, y=prediced_vs, line_kws={'color':'red'}, scatter_kws={'s':10})
-    plt.title('Predicted Ventricular_ICV Value from CN Model Simulations, Varying both sAB_E and sAB_I (AD SC Matrix)')
-    plt.xlabel('sAB_I Value')
+    plt.title('Predicted Ventricular_ICV Value from CN Model Simulations, Varying both sAB_E and sAB_I (CN SC Matrix)')
+    plt.xlabel('sAB_E Value')
     plt.ylabel('Ventricular_ICV')
     plt.savefig(filename)
     
@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
     for (sAB_E, sAB_I) in param_pairs:
         param_set = {
-            'fitted_sc': ad_fitted_sc,
+            'fitted_sc': cn_fitted_sc,
             'fitted_bAB_E': cn_fitted_bAB_E, 
             'fitted_sAB_E': sAB_E, 
             'fitted_bt_E': cn_fitted_bt_E, 
@@ -121,7 +121,8 @@ if __name__ == '__main__':
         prediced_vs.append(np.mean(v))
     
     prediced_vs = np.array(prediced_vs)
-    np.savetxt('trialled_sAB_E_and_I_AD_sc.txt', sAB_Is)
-    np.savetxt('predicted_ventr_icv_sAB_E_and_I_AD_sc.txt', prediced_vs)
+    np.savetxt('trialled_sAB_I_for_both_CN_sc.txt', sAB_Is)
+    np.savetxt('trialled_sAB_E_for_both_CN_sc.txt', sAB_Es)
+    np.savetxt('predicted_ventr_icv_sAB_E_and_I_CN_sc.txt', prediced_vs)
 
-    plot_predictions(sAB_Is, prediced_vs, 'predicted_ventr_icv_sAB_E_and_I_AD_sc_plot.png')
+    plot_predictions(sAB_Es, prediced_vs, 'predicted_ventr_icv_sAB_E_and_I_CN_sc_plot.png')
