@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#PBS -l walltime=06:00:00
+#PBS -l walltime=09:00:00
 #PBS -l select=1:ncpus=1:mem=50gb
 #PBS -o /rds/general/user/dc420/home/ad_modelling_fyp/logs/predicted_ventr/
 #PBS -e /rds/general/user/dc420/home/ad_modelling_fyp/logs/predicted_ventr/
@@ -22,6 +22,6 @@ cp $HOME/ad_modelling_fyp/whole_brain_models/predict_from_sAB.py $TMPDIR
 
 python predict_from_sAB.py 
 
-cp trialled_sAB_I_CN_sc.txt $HOME/ad_modelling_fyp/data/prediction_res
-cp predicted_ventr_icv_sAB_I_CN_sc.txt $HOME/ad_modelling_fyp/data/prediction_res
-cp predicted_ventr_icv_sAB_I_CN_sc_plot.png $HOME/ad_modelling_fyp/data/prediction_res
+cp trialled_sAB_E_and_I_AD_sc.txt $HOME/ad_modelling_fyp/data/prediction_res
+cp predicted_ventr_icv_sAB_E_and_I_AD_sc.txt $HOME/ad_modelling_fyp/data/prediction_res
+cp predicted_ventr_icv_sAB_E_and_I_AD_sc_plot.png $HOME/ad_modelling_fyp/data/prediction_res
