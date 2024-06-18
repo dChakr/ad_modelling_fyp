@@ -1,3 +1,7 @@
+"""
+Get the final fitted values of scaling and bias terms in the Abeta-Tau Model at the end of 
+training with best set of hyperparameters, across the different patient groups
+"""
 from whobpyt.datatypes import par
 from whobpyt.models.RWWABT import RNNRWWABT, ParamsRWWABT
 from whobpyt.optimization.custom_cost_RWW import CostsRWW
@@ -76,9 +80,7 @@ def set_up_model(hyperparams):
     bt_E = hyperparams['bt_E']
     st_E = hyperparams['st_E']
     bAB_I = hyperparams['bAB_I']
-    bAB_I = -0.5
-    # sAB_I = hyperparams['sAB_I']
-    sAB_I = -3
+    sAB_I = hyperparams['sAB_I']
     
     params = ParamsRWWABT(bAB_E=par(val=bAB_E, fit_par=True), sAB_E=par(val=sAB_E, fit_par=True), bt_E=par(val=bt_E, fit_par=True),
                       st_E=par(val=st_E, fit_par=True), bAB_I=par(val=bAB_I, fit_par=True), sAB_I=par(val=sAB_I, fit_par=True))

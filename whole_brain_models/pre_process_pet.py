@@ -1,4 +1,6 @@
-# %%
+"""
+Script to pre-process all Abeta and Tau PET scans and parcellate them
+"""
 import ants
 import os
 from nilearn import datasets, image

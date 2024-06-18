@@ -1,6 +1,6 @@
-# %% [markdown]
-# # Regressor Model for Predicting Ventricular ICV - Random Search to find best hyperparams
-
+"""
+Regressor Model for Predicting Ventricular ICV - Random Search to find best hyperparams
+"""
 # %%
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import train_test_split

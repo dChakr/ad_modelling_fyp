@@ -1,3 +1,6 @@
+"""
+Experiment of predicting the CN ventricular volume score when varying a single dynamic parameter
+"""
 from whobpyt.datatypes import par
 from whobpyt.models.RWWABT import RNNRWWABT, ParamsRWWABT
 from whobpyt.optimization.custom_cost_RWW import CostsRWW
@@ -6,7 +9,6 @@ import pickle
 
 # array and pd stuff
 import numpy as np
-from scipy.io import loadmat # for reading in the .mat files
 import torch
 
 import matplotlib.pyplot as plt

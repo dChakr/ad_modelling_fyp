@@ -1,3 +1,6 @@
+"""
+Optuna hyperparameter tuning study for Abeta-Tau model
+"""
 import pandas as pd
 import numpy as np 
 import json
@@ -122,6 +125,7 @@ if __name__ == '__main__':
     no_jobs = int(sys.argv[4])
 
     # GET ADDITIONAL DATA: SC, A-BETA and TAU
+    
     # normalise structural connectivity matrix
     sc = np.genfromtxt(SC_PATH, delimiter=',')
 
